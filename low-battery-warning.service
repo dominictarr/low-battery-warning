@@ -1,0 +1,12 @@
+[Unit]
+Description=flash keyboard backlight when battery is low.
+After=syslog.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/low-battery-warning
+
+[Install]
+WantedBy=multi-user.target
+
+

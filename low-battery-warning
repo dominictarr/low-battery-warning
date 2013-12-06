@@ -1,0 +1,46 @@
+#! /bin/bash
+
+# watch the battery, and if it gets too low, flash the backlight.
+
+test $UID -eq 0 || {
+  echo 'must be run as root in order to control lights' 1>&2
+  exit 1
+}
+
+set -e
+
+is_charging () {
+  acpi -b | grep Charging > /dev/null
+}
+
+battery_level () {
+  #parse acpi output
+  x=$(acpi -b)
+  x=${x#*harging, }
+  x=${x%\%*};
+  echo $x
+}
+
+# this is the backlight on my archbookair,
+# your computer may have something similar.
+KBBLIGHT='/sys/class/leds/smc::kbd_backlight'
+
+while true; do
+
+  # poll battery level every 10 seconds
+  # if the level is too low, go into warn loop
+
+  test $(battery_level) -lt 10 && {
+    # flash the backlight until someone plugs in the backlight.
+    until is_charging; do
+      echo 100 > $KBBLIGHT/brightness
+      sleep 0.5
+      echo 0 > $KBBLIGHT/brightness
+      sleep 0.5
+    done
+  }
+
+  sleep 10
+
+done
+
