@@ -25,20 +25,23 @@ battery_level () {
 # your computer may have something similar.
 KBBLIGHT='/sys/class/leds/smc::kbd_backlight'
 
+check () {
+  is_charging || test $(battery_level) -gt 10
+}
+
 while true; do
 
   # poll battery level every 10 seconds
   # if the level is too low, go into warn loop
+  # flash the backlight until someone plugs in the backlight.
+  # or the computer has more battery (maybe someone plugged it in while turned off)
 
-  test $(battery_level) -lt 10 && {
-    # flash the backlight until someone plugs in the backlight.
-    until is_charging; do
-      echo 100 > $KBBLIGHT/brightness
-      sleep 0.5
-      echo 0 > $KBBLIGHT/brightness
-      sleep 0.5
-    done
-  }
+  until check; do
+    echo 100 > $KBBLIGHT/brightness
+    sleep 0.5
+    echo 0 > $KBBLIGHT/brightness
+    sleep 0.5
+  done
 
   sleep 10
 
