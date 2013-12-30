@@ -16,7 +16,7 @@ is_charging () {
 battery_level () {
   #parse acpi output
   x=$(acpi -b)
-  x=${x#*harging, }
+  x=${x#*, }
   x=${x%\%*};
   echo $x
 }
@@ -26,7 +26,7 @@ battery_level () {
 KBBLIGHT='/sys/class/leds/smc::kbd_backlight'
 
 check () {
-  is_charging || test $(battery_level) -gt 10
+  is_charging || test "$(battery_level)" -gt 10
 }
 
 while true; do
